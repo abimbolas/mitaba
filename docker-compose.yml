@@ -10,5 +10,9 @@ services:
       - .:/code
     ports:
       - "8000:8000"
+    environment:
+      - DJ_ENV
+      - SECRET_KEY
+      - ALLOWED_HOSTS
     depends_on:
       - db
