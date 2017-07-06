@@ -4,11 +4,8 @@ freeze:
 collectstatic:
 	python manage.py collectstatic
 
-deploy-heroku:
-	git push heroku master
-
 migrate:
-	python manage.py makemigrations store
+	python manage.py makemigrations
 	python manage.py migrate
 
 dev:
