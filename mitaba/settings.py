@@ -84,8 +84,11 @@ WSGI_APPLICATION = 'mitaba.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'HOST': 'localhost',
+        'PORT': 5432
     }
 }
 
@@ -133,10 +136,6 @@ if os.environ.get('DJ_ENV') == 'production':
     SECRET_KEY = os.environ.get('SECRET_KEY')
     DEBUG = False
     DATABASES['default'].update({
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
         'HOST': 'db',
-        'PORT': 5432
     })
     ALLOWED_HOSTS = os.environ.get('DJ_ENV').split(',')
