@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+DEFAULT_OWNER_ID = 1
+
 
 class Entry(models.Model):
+    owner = models.ForeignKey('auth.User', related_name='entry', on_delete=models.CASCADE, default=DEFAULT_OWNER_ID)
     start = models.DateTimeField()
     stop = models.DateTimeField()
     details = ArrayField(
