@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'mitaba.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': 'mitaba_traker',
         'USER': 'postgres',
         'HOST': 'localhost',
         'PORT': 5432
@@ -137,5 +137,6 @@ if os.environ.get('DJ_ENV') == 'production':
     DEBUG = False
     DATABASES['default'].update({
         'HOST': 'db',
+        'NAME': 'postgres',
     })
     ALLOWED_HOSTS = os.environ.get('DJ_ENV').split(',')
