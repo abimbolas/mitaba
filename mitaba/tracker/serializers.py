@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 
 class EntrySerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.username')
+    owner = serializers.ReadOnlyField(source='owner.id')
 
     class Meta:
         model = Entry

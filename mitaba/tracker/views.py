@@ -1,12 +1,11 @@
-from mitaba.tracker.models import Entry
-from mitaba.tracker.serializers import EntrySerializer
+from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-from django.contrib.auth.models import User
-from rest_framework import generics
-from mitaba.tracker.serializers import UserSerializer
+from mitaba.tracker.models import Entry
+from mitaba.tracker.serializers import EntrySerializer, UserSerializer
+from mitaba.tracker.filters import IsOwnerFilterBackend
 
 
 @api_view(['GET'])
@@ -24,8 +23,9 @@ class EntryViewSet(viewsets.ModelViewSet):
     """
     # permission_classes = (permissions.IsAuthenticatedOrReadOnly,
     #                       IsOwnerOrReadOnly,)
-    queryset = Entry.objects.all()
+    queryset = Entry.objects.all().order_by('id')
     serializer_class = EntrySerializer
+    filter_backends = (IsOwnerFilterBackend,)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
