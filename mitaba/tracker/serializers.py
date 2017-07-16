@@ -3,8 +3,8 @@ from mitaba.tracker.models import Entry
 from rest_framework import serializers
 
 
-class EntrySerializer(serializers.HyperlinkedModelSerializer):
-    owner = serializers.ReadOnlyField(source='owner.id')
+class EntrySerializer(serializers.ModelSerializer):
+    # owner = serializers.ReadOnlyField(source='owner.id')
 
     class Meta:
         model = Entry
