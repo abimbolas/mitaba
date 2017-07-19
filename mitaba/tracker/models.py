@@ -11,5 +11,6 @@ class Entry(models.Model):
     details = ArrayField(
         models.CharField(max_length=500, blank=False),
         blank=False,
-        max_length=20
+        max_length=20,
+        db_index=True
     )

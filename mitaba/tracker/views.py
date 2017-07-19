@@ -3,8 +3,12 @@ from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework_bulk import BulkModelViewSet
 from mitaba.tracker.models import Entry
-from mitaba.tracker.serializers import EntrySerializer, UserSerializer
+from mitaba.tracker.serializers import (
+    EntrySerializer,
+    UserSerializer
+)
 from mitaba.tracker.filters import IsOwnerFilterBackend
 
 
@@ -16,19 +20,31 @@ def api_root(request, format=None):
     })
 
 
-class EntryViewSet(viewsets.ModelViewSet):
+class EntryViewSet(BulkModelViewSet):
     """
-    This viewset automatically provides `list`, `create`, `retrieve`,
-    `update` and `destroy` actions.
+    Bulk update enabled view
     """
-    # permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-    #                       IsOwnerOrReadOnly,)
     queryset = Entry.objects.all().order_by('id')
     serializer_class = EntrySerializer
     filter_backends = (IsOwnerFilterBackend,)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+# class EntryViewSet(viewsets.ModelViewSet):
+#     """
+#     This viewset automatically provides `list`, `create`, `retrieve`,
+#     `update` and `destroy` actions.
+#     """
+#     # permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+#     #                       IsOwnerOrReadOnly,)
+#     queryset = Entry.objects.all().order_by('id')
+#     serializer_class = EntrySerializer
+#     filter_backends = (IsOwnerFilterBackend,)
+#
+#     def perform_create(self, serializer):
+#         serializer.save(owner=self.request.user)
 
 
 class UserViewSet(viewsets.ModelViewSet):

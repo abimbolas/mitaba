@@ -1,14 +1,26 @@
 from django.contrib.auth.models import User
 from mitaba.tracker.models import Entry
 from rest_framework import serializers
+from rest_framework_bulk import (
+    BulkListSerializer,
+    BulkSerializerMixin,
+)
 
 
-class EntrySerializer(serializers.ModelSerializer):
-    # owner = serializers.ReadOnlyField(source='owner.id')
-
+class EntrySerializer(BulkSerializerMixin, serializers.ModelSerializer):
     class Meta:
         model = Entry
         fields = ('id', 'start', 'stop', 'details', 'owner')
+        # only necessary in DRF3
+        list_serializer_class = BulkListSerializer
+
+
+# class EntrySerializer(serializers.ModelSerializer):
+#     # owner = serializers.ReadOnlyField(source='owner.id')
+#
+#     class Meta:
+#         model = Entry
+#         fields = ('id', 'start', 'stop', 'details', 'owner')
 
 
 class UserSerializer(serializers.ModelSerializer):
