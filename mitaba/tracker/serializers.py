@@ -15,14 +15,6 @@ class EntrySerializer(BulkSerializerMixin, serializers.ModelSerializer):
         list_serializer_class = BulkListSerializer
 
 
-# class EntrySerializer(serializers.ModelSerializer):
-#     # owner = serializers.ReadOnlyField(source='owner.id')
-#
-#     class Meta:
-#         model = Entry
-#         fields = ('id', 'start', 'stop', 'details', 'owner')
-
-
 class UserSerializer(serializers.ModelSerializer):
     # entry = serializers.PrimaryKeyRelatedField(many=True, queryset=Entry.objects.all())
 

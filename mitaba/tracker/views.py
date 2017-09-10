@@ -32,21 +32,6 @@ class EntryViewSet(BulkModelViewSet):
         serializer.save(owner=self.request.user)
 
 
-# class EntryViewSet(viewsets.ModelViewSet):
-#     """
-#     This viewset automatically provides `list`, `create`, `retrieve`,
-#     `update` and `destroy` actions.
-#     """
-#     # permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-#     #                       IsOwnerOrReadOnly,)
-#     queryset = Entry.objects.all().order_by('id')
-#     serializer_class = EntrySerializer
-#     filter_backends = (IsOwnerFilterBackend,)
-#
-#     def perform_create(self, serializer):
-#         serializer.save(owner=self.request.user)
-
-
 class UserViewSet(viewsets.ModelViewSet):
     """
     This viewset automatically provides `list` and `detail` actions.
