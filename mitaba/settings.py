@@ -24,7 +24,12 @@ SECRET_KEY = '4$=0i_m1^ggzjig&gzl+y96i!2y9t66-m(*6_in^ww_n#ix8^o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'local.candyface',
+    'localhost',
+    '127.0.0.1',
+    '[::1]'
+]
 
 # Application definition
 
@@ -180,4 +185,4 @@ if os.environ.get('DJ_ENV') == 'production':
         'HOST': 'db',
         'NAME': 'postgres',
     })
-    ALLOWED_HOSTS = os.environ.get('DJ_ENV').split(',')
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
