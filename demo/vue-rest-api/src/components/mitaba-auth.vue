@@ -13,6 +13,7 @@
         <!--<button href="" @click="connectFacebook()">Connect facebook</button>-->
         <p v-if="tokens.fb">Facebook токен: {{tokens.fb}}</p>
         <p v-if="search.code">Facebook code: <br><code>{{search.code}}</code></p>
+        <p v-if="search.token">Facebook token: <br><code>{{search.token}}</code></p>
       </div>
     </section>
 
@@ -27,27 +28,40 @@
           fb: ''
         },
         search: {
-          code: ''
+          code: '',
+          token: ''
         }
       }
     },
     created () {
       let query = location.search
       query = query.split('?')
-      if (query.length === 1) return
-      query = query[1].split('&')
-      query.forEach(group => {
-        let keyvalue = group.split('=')
-        if (keyvalue[0] === 'code') {
-          this.search.code = keyvalue[1]
-        }
-      })
+      if (query.length > 1) {
+        query = query[1].split('&')
+        query.forEach(group => {
+          let keyvalue = group.split('=')
+          if (keyvalue[0] === 'code') {
+            this.search.code = keyvalue[1]
+          }
+        })
+      }
+      let hash = location.hash
+      hash = hash.split('#')
+      if (hash.length > 1) {
+        hash = hash[1].split('&')
+        hash.forEach(group => {
+          let keyvalue = group.split('=')
+          if (keyvalue[0] === 'access_token') {
+            this.search.token = keyvalue[1]
+          }
+        })
+      }
     },
     computed: {
       fbAuthUrl () {
         const clientId = '498893767146355'
         const scope = 'email'
-        return `https://www.facebook.com/v2.10/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURI(this.redirectUri('fb'))}&scope=${scope}&response_type=code`
+        return `https://www.facebook.com/v2.10/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURI(this.redirectUri('fb'))}&scope=${scope}&response_type=token`
       }
     },
     methods: {
