@@ -16,6 +16,21 @@
         <p v-if="search.token">Facebook token: <br><code>{{search.token}}</code></p>
       </div>
     </section>
+    <section v-if="tokens.mitaba">
+      <div class="left">
+        <h2>Mitaba</h2>
+        <p>Token: <br><code>{{tokens.mitaba}}</code></p>
+        <div v-if="user">
+          <p>User:</p>
+        </div>
+        <div v-if="entries">
+          <p>Items:</p>
+          <ul>
+            <li v-for="entry in entries">{{entry.details[0]}}</li>
+          </ul>
+        </div>
+      </div>
+    </section>
 
   </div>
 </template>
@@ -24,8 +39,11 @@
   export default {
     data () {
       return {
+        user: {},
+        entries: [],
         tokens: {
-          fb: ''
+          fb: '',
+          mitaba: ''
         },
         search: {
           code: '',
@@ -55,6 +73,34 @@
             this.search.token = keyvalue[1]
           }
         })
+      }
+      if (this.search.token) {
+        const query = {
+          client_id: 'r9LvASxvlwAazWn5PuMr37KtPmObu0dnIkPxeteQ',
+          client_secret: 'Sv4Bzoke8d7PuELvmUJUT0OKaA9lNz6gcvSisPmRj1fJ6eefX1JWCBHKzctJSDaIFqdFVnTW8vc240Y7Whuyko9QRovZAmHicxkWqZl0wj2enw10VsQfjWQ4eLVWGCnN',
+          grant_type: 'convert_token',
+          backend: 'facebook',
+          token: this.search.token
+        }
+        let queryString = []
+        for (const key in query) {
+          queryString.push(`${key}=${query[key]}`)
+        }
+        queryString = queryString.join('&')
+        fetch(`http://localhost:8000/auth/convert-token?${queryString}`, {
+          method: 'POST'
+        })
+          .then(response => {
+            if (response.status < 400) {
+              return response.json()
+            } else {
+              return Promise.reject(response.json())
+            }
+          })
+          .then(token => {
+            this.tokens.mitaba = token.access_token
+          })
+          .catch(console.error)
       }
     },
     computed: {
