@@ -12,6 +12,7 @@
         <p>Перенаправление будет на: <br><code>{{redirectUri('fb')}}</code></p>
         <!--<button href="" @click="connectFacebook()">Connect facebook</button>-->
         <p v-if="tokens.fb">Facebook токен: {{tokens.fb}}</p>
+        <p v-if="search.code">Facebook code: <br><code>{{search.code}}</code></p>
       </div>
     </section>
 
@@ -24,8 +25,23 @@
       return {
         tokens: {
           fb: ''
+        },
+        search: {
+          code: ''
         }
       }
+    },
+    created () {
+      let query = location.search
+      query = query.split('?')
+      if (query.length === 1) return
+      query = query[1].split('&')
+      query.forEach(group => {
+        let keyvalue = group.split('=')
+        if (keyvalue[0] === 'code') {
+          this.search.code = keyvalue[1]
+        }
+      })
     },
     computed: {
       fbAuthUrl () {
