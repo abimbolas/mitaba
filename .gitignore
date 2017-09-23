@@ -38,6 +38,7 @@ __pycache__/
 .Python
 env/
 build/
+!demo/*/build
 develop-eggs/
 dist/
 downloads/

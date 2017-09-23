@@ -3,11 +3,16 @@
     <h2>Auth API Debug</h2>
 
     <section>
-      <h3>Facebook</h3>
-      <a :href="fbAuthUrl">Auth</a>
-      <p>{{redirectUri('fb')}}</p>
-      <!--<button href="" @click="connectFacebook()">Connect facebook</button>-->
-      <p>Facebook token: {{tokens.fb}}</p>
+      <div class="left">
+        <img src="https://ru.facebookbrand.com/wp-content/uploads/2016/05/FB-fLogo-Blue-broadcast-2.png" width="75">
+      </div>
+      <div class="right">
+        <h3><a :href="fbAuthUrl">Войти</a></h3>
+        <p>Авторизация будет через: <br><code>{{fbAuthUrl}}</code></p>
+        <p>Перенаправление будет на: <br><code>{{redirectUri('fb')}}</code></p>
+        <!--<button href="" @click="connectFacebook()">Connect facebook</button>-->
+        <p v-if="tokens.fb">Facebook токен: {{tokens.fb}}</p>
+      </div>
     </section>
 
   </div>
@@ -30,21 +35,8 @@
       }
     },
     methods: {
-      connectFacebook () {
-        // open url wi
-        this.tokens.fb = 'LOL'
-
-//        this.tokens.fb = url
-//        location.replace(url)
-      },
-
       redirectUri (type) {
-//        const paths = {
-//          vk: `/#/vk-auth-success`,
-//          fb: `/#/fb-auth-success`
-//        }
-//        return `${location.protocol}//${location.host}${paths[type]}`
-        return `http://local.candyface:8080/success_cb`
+        return `${location.protocol}//${location.host}/fb-auth-success`
       }
     }
 
@@ -52,5 +44,24 @@
 </script>
 
 <style>
+
+  .auth-debug {
+    margin: 60px;
+    max-width: 45em;
+  }
+
+  .auth-debug h3:first-child,
+  .auth-debug p:first-child {
+    margin-top: 0px;
+  }
+
+  .auth-debug section {
+    display: flex;
+    margin: 50px auto;
+  }
+
+  .auth-debug section .left {
+    padding-right: 3em;
+  }
 
 </style>
