@@ -196,9 +196,11 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
 
 if os.environ.get('DJ_ENV') == 'production':
     SECRET_KEY = os.environ.get('SECRET_KEY')
-    DEBUG = False
+    DEBUG = 'True' == os.environ.get('DEBUG') and True or False
     DATABASES['default'].update({
         'HOST': 'db',
         'NAME': 'postgres',
     })
     ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
+    print(DEBUG)
+    # STATIC_ROOT = os.path.join(os.path.dirname(__file__), 'static')
