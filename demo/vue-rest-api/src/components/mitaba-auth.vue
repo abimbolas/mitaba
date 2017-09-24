@@ -1,8 +1,6 @@
 <template>
   <div class="auth-debug">
-    <h2>Auth API Debug
-      </small>
-    </h2>
+    <h2>Auth API Debug</h2>
 
     <h4 v-if="profile.username">
       Авторизованый пользователь: {{profile.email}}<br>
