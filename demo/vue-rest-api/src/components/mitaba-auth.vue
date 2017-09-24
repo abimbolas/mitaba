@@ -9,14 +9,14 @@
       <div class="right">
         <h3><a :href="fbAuthUrl">Войти</a></h3>
         <p>Авторизация будет через: <br><code>{{fbAuthUrl}}</code></p>
-        <p>Перенаправление будет на: <br><code>{{redirectUri('fb')}}</code></p>
+        <p>Перенаправление будет на: <br><code>{{redirectUri('facebook')}}</code></p>
         <!--<button href="" @click="connectFacebook()">Connect facebook</button>-->
-        <p v-if="tokens.fb">Facebook токен: {{tokens.fb}}</p>
-        <p v-if="search.code">Facebook code: <br><code>{{search.code}}</code></p>
-        <p v-if="search.token">Facebook token: <br><code>{{search.token}}</code></p>
+        <p v-if="token.exchange.facebook">Facebook токен обмена: <br><code class="code">{{token.exchange.facebook}}</code></p>
+        <!-- <p v-if="search.code">Facebook code: <br><code>{{search.code}}</code></p> -->
+        <!-- <p v-if="search.token">Facebook token: <br><code>{{search.token}}</code></p> -->
       </div>
     </section>
-    <section v-if="tokens.mitaba">
+<!--     <section v-if="tokens.mitaba">
       <div class="left">
         <h2>Mitaba</h2>
         <p>Token: <br><code>{{tokens.mitaba}}</code></p>
@@ -40,104 +40,115 @@
           </ol>
         </div>
       </div>
-    </section>
+    </section> -->
   </div>
 </template>
 
 <script>
-  const processFetchResponse = response => {
-    if (response.status < 400) {
-      return response.json()
-    } else {
-      return Promise.reject(response.json())
-    }
-  }
+  // const processFetchResponse = response => {
+  //   if (response.status < 400) {
+  //     return response.json()
+  //   } else {
+  //     return Promise.reject(response.json())
+  //   }
+  // }
 
   export default {
     data () {
       return {
-        user: {},
-        entries: [],
-        tokens: {
-          fb: '',
+        // user: {},
+        // entries: [],
+        token: {
+          exchange: {
+            facebook: ''
+          },
           mitaba: ''
-        },
-        search: {
-          code: '',
-          token: ''
         }
+        // search: {
+        //   code: '',
+        //   token: ''
+        // }
       }
     },
     created () {
-      let query = location.search
-      query = query.split('?')
-      if (query.length > 1) {
-        query = query[1].split('&')
-        query.forEach(group => {
-          let keyvalue = group.split('=')
-          if (keyvalue[0] === 'code') {
-            this.search.code = keyvalue[1]
-          }
-        })
-      }
-      let hash = location.hash
-      hash = hash.split('#')
-      if (hash.length > 1) {
-        hash = hash[1].split('&')
-        hash.forEach(group => {
-          let keyvalue = group.split('=')
-          if (keyvalue[0] === 'access_token') {
-            this.search.token = keyvalue[1]
-          }
-        })
-      }
-      if (this.search.token) {
-        const query = {
-          client_id: 'r9LvASxvlwAazWn5PuMr37KtPmObu0dnIkPxeteQ',
-          client_secret: 'Sv4Bzoke8d7PuELvmUJUT0OKaA9lNz6gcvSisPmRj1fJ6eefX1JWCBHKzctJSDaIFqdFVnTW8vc240Y7Whuyko9QRovZAmHicxkWqZl0wj2enw10VsQfjWQ4eLVWGCnN',
-          grant_type: 'convert_token',
-          backend: 'facebook',
-          token: this.search.token
+      // If we are at auth-success state, get query code
+      if (this.$route.name.match(/-auth-redirect/)) {
+        const provider = this.$route.name.match(/(\w+)-auth-redirect/)[1]
+        let code
+        if (provider === 'facebook') {
+          code = this.$route.query.code
+          this.token.exchange.facebook = code
         }
-        let queryString = []
-        for (const key in query) {
-          queryString.push(`${key}=${query[key]}`)
-        }
-        queryString = queryString.join('&')
-        fetch(`http://localhost:8000/auth/convert-token?${queryString}`, {
-          method: 'POST'
-        })
-          .then(processFetchResponse)
-          .then(token => {
-            this.tokens.mitaba = token.access_token
-            return fetch(`http://${location.hostname}:8000/entries?access_token=${this.tokens.mitaba}`, {
-              method: 'GET'
-            })
-          })
-          .then(processFetchResponse)
-          .then(entries => {
-            this.entries = entries
-            return fetch(`http://${location.hostname}:8000/users?access_token=${this.tokens.mitaba}`, {
-              method: 'GET'
-            })
-          })
-          .then(processFetchResponse)
-          .then(users => {
-            this.user = users[0]
-          })
-          .catch(console.error)
       }
+      // let query = location.search
+      // query = query.split('?')
+      // if (query.length > 1) {
+      //   query = query[1].split('&')
+      //   query.forEach(group => {
+      //     let keyvalue = group.split('=')
+      //     if (keyvalue[0] === 'code') {
+      //       this.search.code = keyvalue[1]
+      //     }
+      //   })
+      // }
+      // let hash = location.hash
+      // hash = hash.split('#')
+      // if (hash.length > 1) {
+      //   hash = hash[1].split('&')
+      //   hash.forEach(group => {
+      //     let keyvalue = group.split('=')
+      //     if (keyvalue[0] === 'access_token') {
+      //       this.search.token = keyvalue[1]
+      //     }
+      //   })
+      // }
+      // if (this.search.token) {
+      //   const query = {
+      //     client_id: 'r9LvASxvlwAazWn5PuMr37KtPmObu0dnIkPxeteQ',
+      //     client_secret: 'Sv4Bzoke8d7PuELvmUJUT0OKaA9lNz6gcvSisPmRj1fJ6eefX1JWCBHKzctJSDaIFqdFVnTW8vc240Y7Whuyko9QRovZAmHicxkWqZl0wj2enw10VsQfjWQ4eLVWGCnN',
+      //     grant_type: 'convert_token',
+      //     backend: 'facebook',
+      //     token: this.search.token
+      //   }
+      //   let queryString = []
+      //   for (const key in query) {
+      //     queryString.push(`${key}=${query[key]}`)
+      //   }
+      //   queryString = queryString.join('&')
+      //   fetch(`http://localhost:8000/auth/convert-token?${queryString}`, {
+      //     method: 'POST'
+      //   })
+      //     .then(processFetchResponse)
+      //     .then(token => {
+      //       this.tokens.mitaba = token.access_token
+      //       return fetch(`http://${location.hostname}:8000/entries?access_token=${this.tokens.mitaba}`, {
+      //         method: 'GET'
+      //       })
+      //     })
+      //     .then(processFetchResponse)
+      //     .then(entries => {
+      //       this.entries = entries
+      //       return fetch(`http://${location.hostname}:8000/users?access_token=${this.tokens.mitaba}`, {
+      //         method: 'GET'
+      //       })
+      //     })
+      //     .then(processFetchResponse)
+      //     .then(users => {
+      //       this.user = users[0]
+      //     })
+      //     .catch(console.error)
+      // }
     },
     computed: {
       fbAuthUrl () {
         const clientId = '498893767146355'
         const scope = 'email'
-        return `https://www.facebook.com/v2.10/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURI(this.redirectUri('fb'))}&scope=${scope}&response_type=token`
+        return `https://www.facebook.com/v2.10/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURI(this.redirectUri('facebook'))}&scope=${scope}&response_type=code`
       }
     },
     methods: {
       redirectUri (type) {
-        return `${location.protocol}//${location.host}/fb-auth-success`
+        return `${location.protocol}//${location.host}/${type}-auth-redirect`
       }
     }
 
@@ -163,6 +174,10 @@
 
   .auth-debug section .left {
     padding-right: 3em;
+  }
+
+  .auth-debug .code {
+    color: crimson;
   }
 
   .tag {
