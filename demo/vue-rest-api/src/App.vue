@@ -27,5 +27,6 @@ code {
   background-color: ghostwhite;
   font-size: 75%;
   padding: 3px 0px;
+  word-break: break-word;
 }
 </style>

@@ -1,21 +1,27 @@
 <template>
   <div class="auth-debug">
-    <h2>Auth API Debug</h2>
+    <h2>Auth API Debug
+      </small>
+    </h2>
+
+    <h4 v-if="profile.username">
+      Авторизованый пользователь: {{profile.email}}<br>
+      Записей: {{entries.length}}
+    </h4>
 
     <section>
       <div class="left">
         <img src="https://ru.facebookbrand.com/wp-content/uploads/2016/05/FB-fLogo-Blue-broadcast-2.png" width="75">
       </div>
       <div class="right">
-        <h3><a :href="fbAuthUrl">Войти</a></h3>
-        <p>Авторизация будет через: <br><code>{{fbAuthUrl}}</code></p>
+        <h3><a :href="authUrl('facebook')">Войти</a></h3>
+        <p>Авторизация будет через: <br><code>{{authUrl('facebook')}}</code></p>
         <p>Перенаправление будет на: <br><code>{{redirectUri('facebook')}}</code></p>
-        <!--<button href="" @click="connectFacebook()">Connect facebook</button>-->
-        <p v-if="token.exchange.facebook">Facebook токен обмена: <br><code class="code">{{token.exchange.facebook}}</code></p>
-        <!-- <p v-if="search.code">Facebook code: <br><code>{{search.code}}</code></p> -->
-        <!-- <p v-if="search.token">Facebook token: <br><code>{{search.token}}</code></p> -->
+        <p v-if="token.facebook">Facebook токен: <br><code class="code">{{token.facebook}}</code></p>
+        <p v-if="token.mitaba">Mitaba токен: <br><code class="code">{{token.mitaba}}</code></p>
       </div>
     </section>
+
 <!--     <section v-if="tokens.mitaba">
       <div class="left">
         <h2>Mitaba</h2>
@@ -45,113 +51,83 @@
 </template>
 
 <script>
-  // const processFetchResponse = response => {
-  //   if (response.status < 400) {
-  //     return response.json()
-  //   } else {
-  //     return Promise.reject(response.json())
-  //   }
-  // }
+  import Api from '@/api'
+  import qs from 'qs'
 
   export default {
     data () {
       return {
-        // user: {},
-        // entries: [],
         token: {
-          exchange: {
-            facebook: ''
-          },
+          facebook: '',
           mitaba: ''
-        }
-        // search: {
-        //   code: '',
-        //   token: ''
-        // }
+        },
+        profile: {},
+        entries: []
       }
     },
     created () {
-      // If we are at auth-success state, get query code
-      if (this.$route.name.match(/-auth-redirect/)) {
-        const provider = this.$route.name.match(/(\w+)-auth-redirect/)[1]
-        let code
-        if (provider === 'facebook') {
-          code = this.$route.query.code
-          this.token.exchange.facebook = code
+      // if authenticated
+      if (this.$route.name === 'auth') {
+        if (localStorage['MitabaToken']) {
+          this.refreshUserData()
         }
       }
-      // let query = location.search
-      // query = query.split('?')
-      // if (query.length > 1) {
-      //   query = query[1].split('&')
-      //   query.forEach(group => {
-      //     let keyvalue = group.split('=')
-      //     if (keyvalue[0] === 'code') {
-      //       this.search.code = keyvalue[1]
-      //     }
-      //   })
-      // }
-      // let hash = location.hash
-      // hash = hash.split('#')
-      // if (hash.length > 1) {
-      //   hash = hash[1].split('&')
-      //   hash.forEach(group => {
-      //     let keyvalue = group.split('=')
-      //     if (keyvalue[0] === 'access_token') {
-      //       this.search.token = keyvalue[1]
-      //     }
-      //   })
-      // }
-      // if (this.search.token) {
-      //   const query = {
-      //     client_id: 'r9LvASxvlwAazWn5PuMr37KtPmObu0dnIkPxeteQ',
-      //     client_secret: 'Sv4Bzoke8d7PuELvmUJUT0OKaA9lNz6gcvSisPmRj1fJ6eefX1JWCBHKzctJSDaIFqdFVnTW8vc240Y7Whuyko9QRovZAmHicxkWqZl0wj2enw10VsQfjWQ4eLVWGCnN',
-      //     grant_type: 'convert_token',
-      //     backend: 'facebook',
-      //     token: this.search.token
-      //   }
-      //   let queryString = []
-      //   for (const key in query) {
-      //     queryString.push(`${key}=${query[key]}`)
-      //   }
-      //   queryString = queryString.join('&')
-      //   fetch(`http://localhost:8000/auth/convert-token?${queryString}`, {
-      //     method: 'POST'
-      //   })
-      //     .then(processFetchResponse)
-      //     .then(token => {
-      //       this.tokens.mitaba = token.access_token
-      //       return fetch(`http://${location.hostname}:8000/entries?access_token=${this.tokens.mitaba}`, {
-      //         method: 'GET'
-      //       })
-      //     })
-      //     .then(processFetchResponse)
-      //     .then(entries => {
-      //       this.entries = entries
-      //       return fetch(`http://${location.hostname}:8000/users?access_token=${this.tokens.mitaba}`, {
-      //         method: 'GET'
-      //       })
-      //     })
-      //     .then(processFetchResponse)
-      //     .then(users => {
-      //       this.user = users[0]
-      //     })
-      //     .catch(console.error)
-      // }
-    },
-    computed: {
-      fbAuthUrl () {
-        const clientId = '498893767146355'
-        const scope = 'email'
-        return `https://www.facebook.com/v2.10/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURI(this.redirectUri('facebook'))}&scope=${scope}&response_type=code`
+
+      // if redirected
+      if (this.$route.name.match(/-auth-redirect/)) {
+        this.authMitaba().then(this.refreshUserData)
       }
     },
+
+    computed: {},
+
     methods: {
       redirectUri (type) {
         return `${location.protocol}//${location.host}/${type}-auth-redirect`
+      },
+
+      authUrl (provider) {
+        const urls = {
+          facebook: `https://www.facebook.com/v2.10/dialog/oauth?client_id=498893767146355&redirect_uri=${encodeURI(this.redirectUri('facebook'))}&scope=email&response_type=token`
+        }
+        return urls[provider]
+      },
+
+      refreshUserData () {
+        this.token.mitaba = localStorage['MitabaToken']
+        Api
+          .get('/users/', { access_token: this.token.mitaba })
+          .then(res => {
+            this.profile = res[0]
+          })
+        Api
+          .get('/entries/', { access_token: this.token.mitaba })
+          .then(res => {
+            this.entries = res
+          })
+      },
+
+      authMitaba () {
+        const provider = this.$route.name.match(/(\w+)-auth-redirect/)[1]
+        if (provider === 'facebook') {
+          const token = this.$route.hash.split('#access_token=')[1].split('&')[0]
+          this.token.facebook = token
+          const params = {
+            client_id: 'mitaba-app-dev',
+            grant_type: 'convert_token',
+            backend: 'facebook',
+            token
+          }
+          return Api
+            .post(`/auth/convert-token?${qs.stringify(params)}`)
+            .then(res => {
+              this.token.mitaba = res.access_token
+              localStorage['MitabaToken'] = this.token.mitaba
+              this.$router.push({ name: 'auth' })
+            })
+        }
       }
     }
-
   }
 </script>
 
@@ -176,7 +152,7 @@
     padding-right: 3em;
   }
 
-  .auth-debug .code {
+  .auth-debug .red {
     color: crimson;
   }
 
