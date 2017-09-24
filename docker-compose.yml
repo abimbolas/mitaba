@@ -7,7 +7,8 @@ services:
       - ./postgres_db:/var/lib/postgresql
   mitaba:
     build: .
-    command: python3 manage.py runserver 0.0.0.0:8000
+#    command: 'python3 manage.py runserver 0.0.0.0:8000'
+    command: './docker-django-entry.sh'
     volumes:
       - .:/code
     ports:
@@ -17,5 +18,7 @@ services:
       - DEBUG
       - SECRET_KEY
       - ALLOWED_HOSTS
+    links:
+      - db
     depends_on:
       - db

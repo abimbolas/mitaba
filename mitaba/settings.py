@@ -202,5 +202,4 @@ if os.environ.get('DJ_ENV') == 'production':
         'NAME': 'postgres',
     })
     ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(',')
-    print(DEBUG)
     # STATIC_ROOT = os.path.join(os.path.dirname(__file__), 'static')
