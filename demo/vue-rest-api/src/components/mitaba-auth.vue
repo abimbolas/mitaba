@@ -25,17 +25,41 @@
         </div>
         <div v-if="entries">
           <p>Items:</p>
-          <ul>
-            <li v-for="entry in entries">{{entry.details[0]}}</li>
-          </ul>
+          <ol>
+            <li v-for="entry in entries">
+              <div>
+                <p>Id: {{entry.id}}</p>
+              </div>
+              <div>
+                <p>Start: {{entry.start}}</p>
+              </div>
+              <div>
+                <p>Stop: {{entry.stop}}</p>
+              </div>
+              <div>
+                <p>Tags: <span class="tag"
+                    v-for="detail in entry.details">{{detail}}</span></p>
+              </div>
+              <div>
+                <p>OwnerID: {{entry.owner}}</p>
+              </div>
+            </li>
+          </ol>
         </div>
       </div>
     </section>
-
   </div>
 </template>
 
 <script>
+  const processFetchResponse = response => {
+    if (response.status < 400) {
+      return response.json()
+    } else {
+      return Promise.reject(response.json())
+    }
+  }
+
   export default {
     data () {
       return {
@@ -99,6 +123,13 @@
           })
           .then(token => {
             this.tokens.mitaba = token.access_token
+            return fetch(`http://${location.hostname}:8000/entries?access_token=${token.access_token}`, {
+              method: 'GET'
+            })
+          })
+          .then(processFetchResponse)
+          .then(entries => {
+            this.entries = entries
           })
           .catch(console.error)
       }
@@ -138,6 +169,13 @@
 
   .auth-debug section .left {
     padding-right: 3em;
+  }
+
+  .tag {
+    border: 1px solid lightgray;
+    border-radius: 2px;
+    padding: 2px;
+    margin: 2px 4px;
   }
 
 </style>
