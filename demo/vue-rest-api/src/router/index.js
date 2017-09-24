@@ -19,8 +19,18 @@ export default new Router({
       component: Auth
     },
     {
-      path: '/fb-auth-success',
-      name: 'auth-success',
+      path: '/facebook-auth-redirect',
+      name: 'facebook-auth-redirect',
+      component: Auth
+    },
+    {
+      path: '/vkontakte-auth-redirect',
+      name: 'vkontakte-auth-redirect',
+      component: Auth
+    },
+    {
+      path: '/google-auth-redirect',
+      name: 'google-auth-redirect',
       component: Auth
     }
   ]
