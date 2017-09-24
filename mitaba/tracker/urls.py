@@ -3,7 +3,7 @@ from rest_framework_bulk.routes import BulkRouter
 # from rest_framework.schemas import get_schema_view
 from mitaba.tracker import views
 
-router = BulkRouter()
+router = BulkRouter(trailing_slash=False)
 router.register(r'entries', views.EntryViewSet)
 router.register(r'users', views.UserViewSet)
 

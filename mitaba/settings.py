@@ -24,6 +24,8 @@ SECRET_KEY = '4$=0i_m1^ggzjig&gzl+y96i!2y9t66-m(*6_in^ww_n#ix8^o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+APPEND_SLASH = False
+
 ALLOWED_HOSTS = [
     'local.candyface',
     'localhost',
