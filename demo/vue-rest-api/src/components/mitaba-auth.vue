@@ -22,27 +22,20 @@
         <p>Token: <br><code>{{tokens.mitaba}}</code></p>
         <div v-if="user">
           <p>User:</p>
+          <ol>
+            <li v-for="(value, key) in user">{{key}} : {{value}}</li>
+          </ol>
         </div>
         <div v-if="entries">
           <p>Items:</p>
           <ol>
             <li v-for="entry in entries">
-              <div>
-                <p>Id: {{entry.id}}</p>
-              </div>
-              <div>
-                <p>Start: {{entry.start}}</p>
-              </div>
-              <div>
-                <p>Stop: {{entry.stop}}</p>
-              </div>
-              <div>
-                <p>Tags: <span class="tag"
-                    v-for="detail in entry.details">{{detail}}</span></p>
-              </div>
-              <div>
-                <p>OwnerID: {{entry.owner}}</p>
-              </div>
+              <p>Id: {{entry.id}}</p>
+              <p>Start: {{entry.start}}</p>
+              <p>Stop: {{entry.stop}}</p>
+              <p>Tags: <span class="tag"
+                             v-for="detail in entry.details">{{detail}}</span></p>
+              <p>OwnerID: {{entry.owner}}</p>
             </li>
           </ol>
         </div>
@@ -114,22 +107,23 @@
         fetch(`http://localhost:8000/auth/convert-token?${queryString}`, {
           method: 'POST'
         })
-          .then(response => {
-            if (response.status < 400) {
-              return response.json()
-            } else {
-              return Promise.reject(response.json())
-            }
-          })
+          .then(processFetchResponse)
           .then(token => {
             this.tokens.mitaba = token.access_token
-            return fetch(`http://${location.hostname}:8000/entries?access_token=${token.access_token}`, {
+            return fetch(`http://${location.hostname}:8000/entries?access_token=${this.tokens.mitaba}`, {
               method: 'GET'
             })
           })
           .then(processFetchResponse)
           .then(entries => {
             this.entries = entries
+            return fetch(`http://${location.hostname}:8000/users?access_token=${this.tokens.mitaba}`, {
+              method: 'GET'
+            })
+          })
+          .then(processFetchResponse)
+          .then(users => {
+            this.user = users[0]
           })
           .catch(console.error)
       }
