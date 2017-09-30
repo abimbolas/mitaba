@@ -187,9 +187,9 @@ SOCIAL_AUTH_FACEBOOK_SECRET = 'c871f4ef692dafb6ae3cd1cd82af870c'
 
 # Define SOCIAL_AUTH_FACEBOOK_SCOPE to get extra permissions from facebook. Email is not sent by default, to get it,
 # you must request the email permission:
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'public_profile']
 SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
-    'fields': 'id, name, email'
+    'fields': 'id, name, email, picture'
 }
 
 # Environment dependent settings
