@@ -6,9 +6,6 @@ from mitaba.tracker import views
 router = BulkRouter()
 router.register(r'entries', views.EntryViewSet)
 router.register(r'users', views.UserViewSet)
-# router.register(r'auth-suka', views.AuthCodeExchange, base_name='auth-suka')
-
-authCodeExchange = views.AuthCodeExchange.as_view()
 
 # schema_view = get_schema_view(title='Mitaba API')
 
