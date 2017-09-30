@@ -16,6 +16,5 @@ authCodeExchange = views.AuthCodeExchange.as_view()
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     url(r'^', include(router.urls)),
-    url(r'^auth-suka/$', authCodeExchange, name="auth-suka")
     # url(r'^api/schema/$', schema_view),
 ]

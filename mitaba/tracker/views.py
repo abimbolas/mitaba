@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from rest_framework.views import APIView
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -43,8 +42,3 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return User.objects.filter(username=self.request.user)
-
-
-class AuthCodeExchange(APIView):
-    def get(self, request, format=None):
-        return Response(data='ebal ya vash OAuth', status=200)
