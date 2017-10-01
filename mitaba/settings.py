@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'rest_framework_social_oauth2',
     'corsheaders',
     'rest_framework',
-    'mitaba.tracker.apps.TrackerConfig'
+    'core.apps.CoreConfig',
+    'tracker.apps.TrackerConfig'
 ]
 
 REST_FRAMEWORK = {
@@ -60,6 +61,8 @@ REST_FRAMEWORK = {
     )
     # 'PAGE_SIZE': 10
 }
+
+AUTH_USER_MODEL = 'core.User'
 
 AUTHENTICATION_BACKENDS = (
     # Facebook OAuth2
@@ -122,8 +125,9 @@ WSGI_APPLICATION = 'mitaba.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mitaba_traker',
-        'USER': 'postgres',
+        'NAME': 'mitaba_tracker',
+        'USER': 'mitaba',
+        'PASSWORD': 'mitaba',
         'HOST': 'localhost',
         'PORT': 5432
     }

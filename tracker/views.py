@@ -1,15 +1,14 @@
-from django.contrib.auth.models import User
-from rest_framework import viewsets
+from django.contrib.auth import get_user_model
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework_bulk import BulkModelViewSet
-from mitaba.tracker.models import Entry
-from mitaba.tracker.serializers import (
-    EntrySerializer,
-    UserSerializer
-)
-from mitaba.tracker.filters import IsOwnerFilterBackend
+
+from core.filters import IsOwnerFilterBackend
+from tracker.models import Entry
+from tracker.serializers import EntrySerializer
+
+User = get_user_model()
 
 
 @api_view(['GET'])
@@ -30,15 +29,3 @@ class EntryViewSet(BulkModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
-
-
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    This viewset automatically provides `list` and `detail` actions.
-    """
-    # permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-    def get_queryset(self):
-        return User.objects.filter(username=self.request.user)

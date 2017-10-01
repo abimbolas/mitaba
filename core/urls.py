@@ -1,11 +1,10 @@
 from django.conf.urls import url, include
 from rest_framework_bulk.routes import BulkRouter
-# from rest_framework.schemas import get_schema_view
-from mitaba.tracker import views
+from .views import UserViewSet
+
 
 router = BulkRouter()
-router.register(r'entries', views.EntryViewSet)
-router.register(r'users', views.UserViewSet)
+router.register(r'users', UserViewSet)
 
 # schema_view = get_schema_view(title='Mitaba API')
 
