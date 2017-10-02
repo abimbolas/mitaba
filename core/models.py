@@ -16,4 +16,4 @@ class Profile(models.Model):
                               related_name='profile',
                               on_delete=models.CASCADE,
                               default=DEFAULT_OWNER_ID)
-    picture_url = models.URLField()
+    picture_url = models.URLField(blank=True)
