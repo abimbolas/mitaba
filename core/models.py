@@ -7,7 +7,8 @@ DEFAULT_OWNER_ID = 1
 
 
 class User(AbstractUser):
-    object_uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
+    pass
+    # object_uuid = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
 
 
 class Profile(models.Model):
@@ -15,3 +16,4 @@ class Profile(models.Model):
                               related_name='profile',
                               on_delete=models.CASCADE,
                               default=DEFAULT_OWNER_ID)
+    picture_url = models.URLField()
