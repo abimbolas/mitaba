@@ -14,7 +14,6 @@ class UserViewSet(viewsets.ModelViewSet):
     # permission_classes = [permissions.IsAuthenticated, TokenHasReadWriteScope]
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    lookup_field = 'object_uuid'
 
     def get_queryset(self):
         return User.objects.filter(username=self.request.user)
