@@ -1,24 +1,19 @@
 version: '3'
-
 services:
   db:
     image: postgres
     volumes:
-      - ./postgres_db:/var/lib/postgresql
-  mitaba:
+      - db_data:/var/lib/postgresql/data
+  web:
     build: .
-#    command: 'python3 manage.py runserver 0.0.0.0:8000'
-    command: './docker-django-entry.sh'
+    image: mitaba:latest
     volumes:
-      - .:/code
+      - ./app:/app
+      - ./dumpdata:/dumpdata
     ports:
-      - "8000:8000"
-    environment:
-      - DJ_ENV
-      - DEBUG
-      - SECRET_KEY
-      - ALLOWED_HOSTS
-    links:
-      - db
+      - 8000:8000
+    command: python manage.py runserver 0.0.0.0:8000
     depends_on:
       - db
+volumes:
+  db_data:
