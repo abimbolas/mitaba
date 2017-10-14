@@ -6,3 +6,4 @@ social-auth-core
 social-auth-app-django
 rest-social-auth
 psycopg2
+gunicorn

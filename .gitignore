@@ -1,5 +1,5 @@
 # Python
 __pycache__
-# Security
-app/**/settings.py
-dumpdata
+log
+settings*
+dumpdata*
