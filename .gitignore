@@ -1,5 +1,9 @@
 # Python
 __pycache__
+# Logs
 log
+# Security
 settings*
+*.pem
+# Dump
 dumpdata*

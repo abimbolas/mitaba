@@ -6,3 +6,16 @@ services:
       - ./host/django/settings.development.py:/app/mitaba/core/settings.py
       - ./host/gunicorn/log:/tmp
       - ./host/postgresql/dumpdata:/dumpdata
+
+  nginx:
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./host/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./host/nginx/log:/tmp
+      - ./host/cert/fullchain1.pem:/etc/nginx/fullchain.pem
+      - ./host/cert/privkey1.pem:/etc/nginx/privkey.pem
+      - ./host/cert/chain1.pem:/etc/nginx/chain.pem
+    depends_on:
+      - app
