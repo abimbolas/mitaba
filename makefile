@@ -27,6 +27,10 @@ deploy-git-changes:
 	git push
 	ssh mitabadev@mitaba.ru "cd /projects/mitaba.ru && make down && make up"
 
+copy-production-settings:
+	scp host/django/settings.production.py mitabadev@mitaba.ru:/projects/mitaba.ru/host/django/settings.production.py
+
+
 # Local development
 dev-up:
 	docker-compose -f docker-compose.production.yml -f docker-compose.development.yml up
