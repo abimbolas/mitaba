@@ -1,0 +1,42 @@
+version: "3"
+services:
+  db:
+    restart: always
+    image: postgres
+    container_name: mitaba_db
+    volumes:
+      - mitaba_db_data:/var/lib/postgresql/data
+
+  app:
+    restart: always
+    build: .
+    image: antivitla/mitaba
+    container_name: mitaba_app
+    volumes:
+      - ./host/django/settings.production.py:/app/mitaba/core/settings.py
+      - ./host/gunicorn/log:/tmp
+      - ./host/postgresql/dumpdata:/dumpdata
+    expose:
+      - 8000
+    command: gunicorn -w 3 -b 0.0.0.0:8000 --forwarded-allow-ips="*" --reload --log-file /tmp/gunicorn.error.log --access-logfile /tmp/gunicorn.access.log mitaba.core.wsgi:application
+    depends_on:
+      - db
+
+  nginx:
+    restart: always
+    image: nginx
+    container_name: mitaba_nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./host/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./host/nginx/log:/tmp
+      - /etc/letsencrypt/live/mitaba.ru/fullchain.pem:/etc/nginx/fullchain.pem
+      - /etc/letsencrypt/live/mitaba.ru/privkey.pem:/etc/nginx/privkey.pem
+      - /etc/letsencrypt/live/mitaba.ru/chain.pem:/etc/nginx/chain.pem
+    depends_on:
+      - app
+
+volumes:
+  mitaba_db_data:

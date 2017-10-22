@@ -1,0 +1,9 @@
+Django
+django-cors-headers
+djangorestframework
+djangorestframework-bulk
+social-auth-core
+social-auth-app-django
+rest-social-auth
+psycopg2
+gunicorn
