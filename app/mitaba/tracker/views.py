@@ -60,6 +60,8 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 				entries, group = last_months(entries, limit, offset)
 			elif last == 'years':
 				entries, group = last_years(entries, limit, offset)
+			elif last == 'tasks':
+				entries, group = last_tasks(entries, limit, offset)
 			else:
 				raise NotFound()
 			pagination_json = group_pagination(group, limit, offset, last)
@@ -165,6 +167,17 @@ def last_years(entries, limit, offset):
 		raise NotFound()
 	return (filtered_entries, group)
 
+# Last tasks
+def last_tasks(entries, limit, offset):
+	group = []
+	details_list = list(map(lambda d: d.get('details')[0], entries.values('details')))
+	for d in details_list:
+		if d not in group:
+			group.append(d)
+	filtered_entries = entries.filter(details__0__in=group[offset:offset+limit])
+	log.debug(filtered_entries.count())
+	return (filtered_entries, group)
+
 # Entries pagination
 def entries_pagination(limit, offset, count):
 	return {
@@ -176,21 +189,31 @@ def entries_pagination(limit, offset, count):
 	}
 
 # Group pagination
+
+def get_group_value(item):
+	if isinstance(item, datetime.date):
+		return item.isoformat()
+	else:
+		return item
+
 def group_pagination(group, limit, offset, type):
 	previous_group = None
 	next_group = None
 	if offset - limit >= 0:
-		previous_group = list(map(lambda d: d.isoformat(), group[offset-limit:offset]))
-		if len(previous_group) == 0:
-			previous_group = None
+		previous_group = list(map(lambda g: get_group_value(g), group[offset-limit:offset]))
 	else:
-		previous_group = list(map(lambda d: d.isoformat(), group[0:offset]))
+		previous_group = list(map(lambda g: get_group_value(g), group[0:offset]))
+
 	if offset + limit <= len(list(group)):
-		next_group = list(map(lambda d: d.isoformat(), group[offset+limit:offset+limit+limit]))
-		if len(next_group) == 0:
-			next_group = None
+		next_group = list(map(lambda g: get_group_value(g), group[offset+limit:offset+limit+limit]))
 	else:
-		next_group = list(map(lambda d: d.isoformat(), group[offset+limit:len(group)]))
+		next_group = list(map(lambda g: get_group_value(g), group[offset+limit:len(group)]))
+
+	if len(previous_group) == 0:
+		previous_group = None
+	if len(next_group) == 0:
+		next_group = None
+
 	return {
 		'pagination': {
 			'previous': previous_group,
