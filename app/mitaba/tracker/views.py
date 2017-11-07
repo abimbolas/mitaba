@@ -69,7 +69,7 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 			elif last == 'years':
 				entries, group = last_years(entries, limit, offset)
 			elif last == 'tasks':
-				entries, group = last_tasks(entries, limit, offset, context)
+				entries, group = last_tasks(entries, limit, offset)
 			else:
 				raise NotFound()
 			pagination_json = group_pagination(group, limit, offset, last)
