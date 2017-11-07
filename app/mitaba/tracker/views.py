@@ -15,6 +15,8 @@ import operator
 import re
 import datetime
 from django.db.models import Q
+from django.utils.encoding import uri_to_iri
+import urllib
 
 dateRegexp = re.compile('(\s|^)((\d{4})|(\d{1,2}\.\d{4})|(\d{1,2}\.\d{1,2}\.\d{4}))(\s|$)')
 
@@ -40,9 +42,15 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 			raise ParseError(detail='Offset cannot be negative')
 
 		# 'Context' query
-		context = self.request.query_params.get('context', None)
-		if context is not None:
-			# filter context entries and pass further
+		context = self.request.query_params.getlist('context[]', None)
+		if len(context) > 0:
+			context_filter = {}
+			detail_index = 0
+			for detail in context:
+				context_filter['details__' + str(detail_index)] = uri_to_iri(context[detail_index])
+				detail_index = detail_index + 1
+			entries = entries.filter(**context_filter)
+			count = entries.count()
 			context_json = {'context': context}
 
 		# 'Filter' query
@@ -61,13 +69,13 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 			elif last == 'years':
 				entries, group = last_years(entries, limit, offset)
 			elif last == 'tasks':
-				entries, group = last_tasks(entries, limit, offset)
+				entries, group = last_tasks(entries, limit, offset, context)
 			else:
 				raise NotFound()
 			pagination_json = group_pagination(group, limit, offset, last)
 
 		# Simple paginate otherwise
-		if (context is None) and (last is None):
+		if (len(context) == 0) and (last is None):
 			entries = last_items(entries, limit, offset)
 			pagination_json = entries_pagination(limit, offset, count)
 
@@ -175,7 +183,6 @@ def last_tasks(entries, limit, offset):
 		if d not in group:
 			group.append(d)
 	filtered_entries = entries.filter(details__0__in=group[offset:offset+limit])
-	log.debug(filtered_entries.count())
 	return (filtered_entries, group)
 
 # Entries pagination
