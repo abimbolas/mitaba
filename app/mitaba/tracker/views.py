@@ -32,14 +32,18 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 		context_json = {}
 		pagination_json = {}
 
-		# Limit and Offset check
-		limit = int(self.request.query_params.get('limit', 20))
+		# Limit check
+		limit = self.request.query_params.get('limit', None)
+		if (limit is not None) and (limit != 'false'):
+			limit = int(limit)
+			if limit < 1:
+				raise ParseError(detail='Limit should be 1 or more')
+
 		offset = int(self.request.query_params.get('offset', 0))
-		count = entries.count()
-		if limit < 1:
-			raise ParseError(detail='Limit should be 1 or more')
 		if offset < 0:
 			raise ParseError(detail='Offset cannot be negative')
+
+		count = entries.count()
 
 		# 'Context' query
 		context = self.request.query_params.getlist('context[]', None)
@@ -63,12 +67,20 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 		if last is not None:
 			group = None
 			if last == 'days':
+				if limit is None:
+					limit = 3
 				entries, group = last_days(entries, limit, offset)
 			elif last == 'months':
+				if limit is None:
+					limit = 1
 				entries, group = last_months(entries, limit, offset)
 			elif last == 'years':
+				if limit is None:
+					limit = 1
 				entries, group = last_years(entries, limit, offset)
 			elif last == 'tasks':
+				if limit is None:
+					limit = 1
 				entries, group = last_tasks(entries, limit, offset)
 			else:
 				raise NotFound()
@@ -76,6 +88,8 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 
 		# Simple paginate otherwise
 		if (len(context) == 0) and (last is None):
+			if limit is None:
+				limit = 20
 			entries = last_items(entries, limit, offset)
 			pagination_json = entries_pagination(limit, offset, count)
 
@@ -133,7 +147,11 @@ def filter_entries(entries, filters):
 def last_items(entries, limit, offset):
 	if offset >= len(entries):
 		raise NotFound()
-	filtered_entries = entries[offset:offset+limit]
+	filtered_entries = entries
+	if limit == 'false':
+		filtered_entries = entries[offset:len(entries)]
+	else:
+		filtered_entries = entries[offset:offset+limit]
 	if len(filtered_entries) == 0:
 		raise NotFound()
 	return filtered_entries
@@ -143,8 +161,12 @@ def last_days(entries, limit, offset):
 	group = entries.dates('start', 'day', order='DESC')
 	if offset >= len(group):
 		raise NotFound()
-	lookup_days = group[offset:offset+limit]
-	filtered_entries = entries.filter(start__date__in=lookup_days)
+	lookup = group
+	if limit == 'false':
+		lookup = group[offset:len(group)]
+	else:
+		lookup = group[offset:offset+limit]
+	filtered_entries = entries.filter(start__date__in=lookup)
 	if len(filtered_entries) == 0:
 		raise NotFound()
 	return (filtered_entries, group)
@@ -154,7 +176,11 @@ def last_months(entries, limit, offset):
 	group = entries.dates('start', 'month', order='DESC')
 	if offset >= len(group):
 		raise NotFound()
-	lookup = group[offset:offset+limit]
+	lookup = group
+	if limit == 'false':
+		lookup = group[offset:len(group)]
+	else:
+		lookup = group[offset:offset+limit]
 	lookup_to = lookup[0] + relativedelta(months=+1)
 	lookup_from = lookup[-1]
 	filtered_entries = entries.filter(start__range=(lookup_from, lookup_to))
@@ -167,7 +193,11 @@ def last_years(entries, limit, offset):
 	group = entries.dates('start', 'year', order='DESC')
 	if offset >= len(group):
 		raise NotFound()
-	lookup = group[offset:offset+limit]
+	lookup = group
+	if limit == 'false':
+		lookup = group[offset:len(group)]
+	else:
+		lookup = group[offset:offset+limit]
 	lookup_to = lookup[0] + relativedelta(years=+1)
 	lookup_from = lookup[-1]
 	filtered_entries = entries.filter(start__range=(lookup_from, lookup_to))
@@ -182,18 +212,32 @@ def last_tasks(entries, limit, offset):
 	for d in details_list:
 		if d not in group:
 			group.append(d)
-	filtered_entries = entries.filter(details__0__in=group[offset:offset+limit])
+	lookup = group
+	if limit == 'false':
+		lookup = group[offset:len(group)]
+	else:
+		lookup = group[offset:offset+limit]
+	filtered_entries = entries.filter(details__0__in=lookup)
 	return (filtered_entries, group)
 
 # Entries pagination
 def entries_pagination(limit, offset, count):
-	return {
-		'pagination': {
-			'count': count,
-			'limit': limit,
-			'offset': offset
+	if limit == 'false':
+		return {
+			'pagination': {
+				'count': count,
+				'limit': False,
+				'offset': offset
+			}
 		}
-	}
+	else:
+		return {
+			'pagination': {
+				'count': count,
+				'limit': limit,
+				'offset': offset
+			}
+		}
 
 # Group pagination
 
