@@ -72,7 +72,7 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 				entries, group = last_days(entries, limit, offset)
 			elif last == 'months':
 				if limit is None:
-					limit = 1
+					limit = 3
 				entries, group = last_months(entries, limit, offset)
 			elif last == 'years':
 				if limit is None:
@@ -80,14 +80,14 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 				entries, group = last_years(entries, limit, offset)
 			elif last == 'tasks':
 				if limit is None:
-					limit = 1
-				entries, group = last_tasks(entries, limit, offset)
+					limit = 3
+				entries, group = last_tasks(entries, limit, offset, len(context))
 			else:
 				raise NotFound()
 			pagination_json = group_pagination(group, limit, offset, last)
 
 		# Simple paginate otherwise
-		if (len(context) == 0) and (last is None):
+		if last is None:
 			if limit is None:
 				limit = 20
 			entries = last_items(entries, limit, offset)
@@ -206,9 +206,9 @@ def last_years(entries, limit, offset):
 	return (filtered_entries, group)
 
 # Last tasks
-def last_tasks(entries, limit, offset):
+def last_tasks(entries, limit, offset, context_length):
 	group = []
-	details_list = list(map(lambda d: d.get('details')[0], entries.values('details')))
+	details_list = list(map(lambda d: d.get('details')[context_length], entries.values('details')))
 	for d in details_list:
 		if d not in group:
 			group.append(d)
@@ -217,7 +217,9 @@ def last_tasks(entries, limit, offset):
 		lookup = group[offset:len(group)]
 	else:
 		lookup = group[offset:offset+limit]
-	filtered_entries = entries.filter(details__0__in=lookup)
+	lookup_param = {}
+	lookup_param['details__' + str(context_length) + '__in'] = lookup
+	filtered_entries = entries.filter(**lookup_param)
 	return (filtered_entries, group)
 
 # Entries pagination
