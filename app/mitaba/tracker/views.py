@@ -60,7 +60,7 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 		# 'Filter' query
 		filters = self.request.query_params.getlist('filter[]', None)
 		if len(filters) > 0:
-			entries, count = filter_entries(entries, filters)
+			entries, count = filter_entries(entries, filters, context)
 
 		# 'Last' query
 		last = self.request.query_params.get('last', None)
@@ -119,8 +119,13 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 # Filtering entries
 #
 
+def context_detail_filter(offset, detail):
+	df = {}
+	df['details__' + str(offset) + '_100__icontains'] = detail
+	return df
+
 # Filtered entries
-def filter_entries(entries, filters):
+def filter_entries(entries, filters, context=[]):
 	filtered_entries = entries
 	# Filter date
 	filter_date = list(filter(lambda f: dateRegexp.match(f) is not None, filters))
@@ -137,7 +142,7 @@ def filter_entries(entries, filters):
 	# Filter details
 	filter_details = list(filter(lambda f: dateRegexp.match(f) is None, filters))
 	if len(filter_details) > 0:
-		query = reduce(operator.and_, (Q(details__icontains=d) for d in filter_details))
+		query = reduce(operator.and_, (Q(**context_detail_filter(len(context), d)) for d in filter_details))
 		filtered_entries = filtered_entries.filter(query)
 	# Set final count
 	filtered_count = filtered_entries.count()
