@@ -51,7 +51,7 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 			context_filter = {}
 			detail_index = 0
 			for detail in context:
-				context_filter['details__' + str(detail_index)] = uri_to_iri(context[detail_index])
+				context_filter['details__' + str(detail_index)] = context[detail_index]
 				detail_index = detail_index + 1
 			entries = entries.filter(**context_filter)
 			count = entries.count()
@@ -213,7 +213,8 @@ def last_years(entries, limit, offset):
 # Last tasks
 def last_tasks(entries, limit, offset, context_length):
 	group = []
-	details_list = list(map(lambda d: d.get('details')[context_length], entries.values('details')))
+	all_details = entries.filter(details__len__gt=context_length).values('details')
+	details_list = list(map(lambda d: d.get('details')[context_length], all_details))
 	for d in details_list:
 		if d not in group:
 			group.append(d)
