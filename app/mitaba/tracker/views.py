@@ -1,4 +1,5 @@
 from dateutil.relativedelta import relativedelta
+from dateutil.parser import parse as ParseDate
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -30,19 +31,27 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 	def list(self, request):
 		entries = self.get_queryset()
 		context_json = {}
-		pagination_json = {}
+		pagination_json = None
 
 		# Limit check
 		limit = self.request.query_params.get('limit', None)
 		if (limit is not None) and (limit != 'false'):
-			limit = int(limit)
+			try:
+				limit = int(limit)
+			except ValueError:
+				raise ParseError(detail='Bad limit')
 			if limit < 1:
 				raise ParseError(detail='Limit should be 1 or more')
 
-		offset = int(self.request.query_params.get('offset', 0))
+		# Offset check
+		try:
+			offset = int(self.request.query_params.get('offset', 0))
+		except ValueError:
+			offset = 0
 		if offset < 0:
 			raise ParseError(detail='Offset cannot be negative')
 
+		# Count set
 		count = entries.count()
 
 		# 'Context' query
@@ -56,6 +65,13 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 			entries = entries.filter(**context_filter)
 			count = entries.count()
 			context_json = {'context': context}
+
+		# 'From' and 'To' query
+		start_from = self.request.query_params.get('start_from', None)
+		start_to = self.request.query_params.get('start_to', None)
+		if (start_from is not None) or (start_to is not None):
+			entries, count = interval_entries(entries, start_from, start_to)
+			pagination_json = interval_pagination(count)
 
 		# 'Filter' query
 		filters = self.request.query_params.getlist('filter[]', None)
@@ -87,9 +103,8 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 			pagination_json = group_pagination(group, limit, offset, last)
 
 		# Simple paginate otherwise
-		if last is None:
-			if limit is None:
-				limit = 20
+		if pagination_json is None:
+			# if (start_from is None) and (start_to is None) and (last is None) and (limit is None):
 			entries = last_items(entries, limit, offset)
 			pagination_json = entries_pagination(limit, offset, count)
 
@@ -123,6 +138,25 @@ def context_detail_filter(offset, detail):
 	df = {}
 	df['details__' + str(offset) + '_100__icontains'] = detail
 	return df
+
+# Interval entries
+def interval_entries(entries, start_from, start_to):
+	filtered_entries = entries
+	start_datetime = None
+	stop_datetime = None
+
+	try:
+		if (start_from is not None) and (start_from != 'auto'):
+			start_datetime = ParseDate(start_from)
+			filtered_entries = filtered_entries.filter(start__gte=start_datetime)
+		if (start_to is not None) and (start_to != 'auto'):
+			stop_datetime = ParseDate(start_to)
+			filtered_entries = filtered_entries.filter(start__lte=stop_datetime)
+	except ValueError:
+		raise ParseError(detail='Bad start_from or start_to query params')
+
+	filtered_count = filtered_entries.count()
+	return (filtered_entries, filtered_count)
 
 # Filtered entries
 def filter_entries(entries, filters, context=[]):
@@ -228,6 +262,16 @@ def last_tasks(entries, limit, offset, context_length):
 	filtered_entries = entries.filter(**lookup_param)
 	return (filtered_entries, group)
 
+# Interval pagination
+def interval_pagination(count):
+	return {
+		'pagination': {
+			'count': count,
+			'limit': False,
+			'offset': False
+		}
+	}
+
 # Entries pagination
 def entries_pagination(limit, offset, count):
 	if limit == 'false':
@@ -248,7 +292,6 @@ def entries_pagination(limit, offset, count):
 		}
 
 # Group pagination
-
 def get_group_value(item):
 	if isinstance(item, datetime.date):
 		return item.isoformat()
