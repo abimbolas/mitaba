@@ -21,6 +21,12 @@ import urllib
 
 dateRegexp = re.compile('(\s|^)((\d{4})|(\d{1,2}\.\d{4})|(\d{1,2}\.\d{1,2}\.\d{4}))(\s|$)')
 
+default_entries_limit = 20
+default_days_limit = 7
+default_months_limit = 1
+default_years_limit = 1
+default_tasks_limit = 3
+
 class EntryView(ListBulkCreateUpdateDestroyAPIView):
 	authentication_classes = (TokenAuthentication,)
 	permission_classes = (IsAuthenticated,)
@@ -84,27 +90,26 @@ class EntryView(ListBulkCreateUpdateDestroyAPIView):
 			group = None
 			if last == 'days':
 				if limit is None:
-					limit = 3
+					limit = default_days_limit
 				entries, group = last_days(entries, limit, offset)
 			elif last == 'months':
 				if limit is None:
-					limit = 3
+					limit = default_months_limit
 				entries, group = last_months(entries, limit, offset)
 			elif last == 'years':
 				if limit is None:
-					limit = 1
+					limit = default_years_limit
 				entries, group = last_years(entries, limit, offset)
 			elif last == 'tasks':
 				if limit is None:
-					limit = 3
+					limit = default_tasks_limit
 				entries, group = last_tasks(entries, limit, offset, len(context))
 			else:
 				raise NotFound()
 			pagination_json = group_pagination(group, limit, offset, last)
 
-		# Simple paginate otherwise
+		# Simple paginate
 		if pagination_json is None:
-			# if (start_from is None) and (start_to is None) and (last is None) and (limit is None):
 			entries = last_items(entries, limit, offset)
 			pagination_json = entries_pagination(limit, offset, count)
 
@@ -189,6 +194,8 @@ def last_items(entries, limit, offset):
 	filtered_entries = entries
 	if limit == 'false':
 		filtered_entries = entries[offset:len(entries)]
+	elif limit is None:
+		filtered_entries = entries[offset:offset+default_entries_limit]
 	else:
 		filtered_entries = entries[offset:offset+limit]
 	if len(filtered_entries) == 0:
@@ -267,29 +274,25 @@ def interval_pagination(count):
 	return {
 		'pagination': {
 			'count': count,
-			'limit': False,
-			'offset': False
+			'limit': None,
+			'offset': 0
 		}
 	}
 
 # Entries pagination
 def entries_pagination(limit, offset, count):
+	parsed_limit = limit
 	if limit == 'false':
-		return {
-			'pagination': {
-				'count': count,
-				'limit': False,
-				'offset': offset
-			}
+		parsed_limit = False
+	if limit is None:
+		parsed_limit = default_entries_limit
+	return {
+		'pagination': {
+			'count': count,
+			'limit': parsed_limit,
+			'offset': offset
 		}
-	else:
-		return {
-			'pagination': {
-				'count': count,
-				'limit': limit,
-				'offset': offset
-			}
-		}
+	}
 
 # Group pagination
 def get_group_value(item):
