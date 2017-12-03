@@ -155,7 +155,7 @@ def interval_entries(entries, start_from, start_to):
 			start_datetime = ParseDate(start_from)
 			filtered_entries = filtered_entries.filter(start__gte=start_datetime)
 		if (start_to is not None) and (start_to != 'auto'):
-			stop_datetime = ParseDate(start_to)
+			stop_datetime = ParseDate(start_to) + relativedelta(days=+1)
 			filtered_entries = filtered_entries.filter(start__lte=stop_datetime)
 	except ValueError:
 		raise ParseError(detail='Bad start_from or start_to query params')
