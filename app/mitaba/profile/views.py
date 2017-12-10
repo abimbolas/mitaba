@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 
 class ProfileView(APIView):
     authentication_classes = (TokenAuthentication,)
@@ -28,6 +29,13 @@ class ProfileView(APIView):
                 'providers': providers
             }
             return Response(profile)
+        except User.DoesNotExist:
+            raise NotFound('User Not Found')
+
+    def delete(self, request):
+        try:
+            User.objects.get(pk = request.user.pk).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
         except User.DoesNotExist:
             raise NotFound('User Not Found')
 
