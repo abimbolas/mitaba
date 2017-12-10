@@ -18,12 +18,9 @@ deploy-restart:
 deploy-check-ps:
 	ssh mitabadev@mitaba.ru "cd /projects/mitaba.ru && docker ps"
 
-deploy-docker-changes:
+deploy-changes:
 	docker-compose -f docker-compose.production.yml build --force-rm --pull
 	docker push antivitla/mitaba
-	ssh mitabadev@mitaba.ru "cd /projects/mitaba.ru && make down && make up"
-
-deploy-git-changes:
 	git push
 	ssh mitabadev@mitaba.ru "cd /projects/mitaba.ru && make down && make up"
 
