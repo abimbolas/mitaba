@@ -32,8 +32,17 @@
 
 Периодически делай дамп базы изнутри контейнера `make dumpdata` (см. `/app/makefile` для других команд)
 
-* * *
-
 ## Настройки Django для разработки
 
 Файл `settings.py` не хранится в репозитории, его нужно попросить у <antivitla@gmail.com> и положить в `app/mitaba/core/`. Без этого проект не запустится.
+
+## Обновление сертификатов
+
+```
+ssh mitaba.ru
+cd /projects/mitaba.ru
+make down
+sudo certbot renew
+make up
+exit
+```
