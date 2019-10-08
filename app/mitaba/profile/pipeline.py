@@ -5,7 +5,7 @@ def profile_details(backend, response, social, details, uid, user=None, *args, *
 
   # Facebook
   if backend.name == 'facebook':
-    avatar = 'https://graph.facebook.com/v2.10/%s/picture' % response.get('id')
+    avatar = 'https://graph.facebook.com/v4.0/%s/picture' % response.get('id')
 
   # Github
   elif backend.name == 'github':
