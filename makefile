@@ -13,19 +13,19 @@ dumpdata:
 
 # Deploy
 deploy-restart:
-	ssh mitabadev@mitaba.ru "cd /projects/mitaba.ru && make down && make up"
+	ssh antivitla@mitaba.ru "cd /projects/mitaba.ru && make down && make up"
 
 deploy-check-ps:
-	ssh mitabadev@mitaba.ru "cd /projects/mitaba.ru && docker ps"
+	ssh antivitla@mitaba.ru "cd /projects/mitaba.ru && docker ps"
 
 deploy-changes:
 	docker-compose -f docker-compose.production.yml build --force-rm --pull
 	docker push antivitla/mitaba
 	git push
-	ssh mitabadev@mitaba.ru "cd /projects/mitaba.ru && make down && make up"
+	ssh antivitla@mitaba.ru "cd /projects/mitaba.ru && make down && make up"
 
 copy-production-settings:
-	scp host/django/settings.production.py mitabadev@mitaba.ru:/projects/mitaba.ru/host/django/settings.production.py
+	scp host/django/settings.production.py antivitla@mitaba.ru:/projects/mitaba.ru/host/django/settings.production.py
 
 
 # Local development
