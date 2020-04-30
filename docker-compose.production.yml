@@ -34,7 +34,6 @@ services:
       - ./host/nginx/log:/tmp
       - /etc/letsencrypt/live/mitaba.ru/fullchain.pem:/etc/nginx/fullchain.pem
       - /etc/letsencrypt/live/mitaba.ru/privkey.pem:/etc/nginx/privkey.pem
-      - /etc/letsencrypt/live/mitaba.ru/chain.pem:/etc/nginx/chain.pem
     depends_on:
       - app
 
