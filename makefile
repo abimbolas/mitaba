@@ -28,8 +28,11 @@ deploy-docker-image:
 	docker-compose -f docker-compose.production.yml build --force-rm --pull
 	docker push antivitla/mitaba
 
-copy-production-settings:
+copy-production-settings-to-mitaba:
 	scp host/django/settings.production.py antivitla@mitaba.ru:/projects/mitaba.ru/host/django/settings.production.py
+
+copy-production-settings-from-mitaba:
+	scp antivitla@mitaba.ru:/projects/mitaba.ru/host/django/settings.production.py host/django/settings.production.py
 
 
 # Local development
