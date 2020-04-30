@@ -2,12 +2,14 @@ version: "3"
 services:
   db:
     restart: "no"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "trust"
   app:
     restart: "no"
     volumes:
       - ./app:/app
       - ./host/django/settings.development.py:/app/mitaba/core/settings.py
-      - ./host/gunicorn/log:/tmp
+      - ./host/gunicorn/log:/temp
       - ./host/postgresql/dumpdata:/dumpdata
 
   nginx:

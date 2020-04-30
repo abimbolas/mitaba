@@ -14,11 +14,11 @@ services:
     container_name: mitaba_app
     volumes:
       - ./host/django/settings.production.py:/app/mitaba/core/settings.py
-      - ./host/gunicorn/log:/tmp
+      - ./host/gunicorn/log:/temp
       - ./host/postgresql/dumpdata:/dumpdata
     expose:
       - 8000
-    command: gunicorn -w 3 -b 0.0.0.0:8000 --forwarded-allow-ips="*" --reload --log-file /tmp/gunicorn.error.log --access-logfile /tmp/gunicorn.access.log mitaba.core.wsgi:application
+    command: gunicorn -w 3 -b 0.0.0.0:8000 --forwarded-allow-ips="*" --reload --log-file /temp/gunicorn.error.log --access-logfile /temp/gunicorn.access.log mitaba.core.wsgi:application
     depends_on:
       - db
 
