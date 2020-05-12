@@ -17,7 +17,7 @@ def profile_details(backend, response, social, details, uid, user=None, *args, *
   # Google
   elif backend.name == 'google-oauth2':
     try:
-      avatar = response.get('image').get('url')
+      avatar = response.get('picture')
     except:
       pass
 
