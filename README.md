@@ -46,7 +46,7 @@
 ssh mitaba.ru
 cd /projects/mitaba.ru
 make down
-sudo certbot renew
+sudo certbot-auto renew
 make up
 exit
 ```
